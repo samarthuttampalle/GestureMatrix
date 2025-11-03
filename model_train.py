@@ -5,7 +5,6 @@ from tensorflow.keras.applications.efficientnet import preprocess_input
 from tensorflow.keras import layers, models
 import os
 
-# Constants
 IMAGE_SIZE = (224, 224)
 BATCH_SIZE = 16
 DATA_DIR = "/content/asl_data/asl_alphabet_train/asl_alphabet_train"
@@ -13,7 +12,6 @@ DATA_DIR = "/content/asl_data/asl_alphabet_train/asl_alphabet_train"
 print("TensorFlow version:", tf.__version__)
 print("GPU Available:", tf.config.list_physical_devices('GPU'))
 
-# Step 1: Data Generators with explicit parameters
 train_datagen = ImageDataGenerator(
     preprocessing_function=preprocess_input,
     validation_split=0.2,
@@ -21,7 +19,7 @@ train_datagen = ImageDataGenerator(
     zoom_range=0.1,
     width_shift_range=0.1,
     height_shift_range=0.1,
-    horizontal_flip=False  # Important for ASL - don't flip hands!
+    horizontal_flip=False  
 )
 
 val_datagen = ImageDataGenerator(
@@ -29,7 +27,7 @@ val_datagen = ImageDataGenerator(
     validation_split=0.2
 )
 
-# Create generators
+
 train_generator = train_datagen.flow_from_directory(
     DATA_DIR,
     target_size=IMAGE_SIZE,
@@ -37,7 +35,7 @@ train_generator = train_datagen.flow_from_directory(
     class_mode='sparse',
     subset='training',
     seed=123,
-    color_mode='rgb',  # Explicitly specify RGB
+    color_mode='rgb',  
     interpolation='bilinear'
 )
 
@@ -48,7 +46,7 @@ val_generator = val_datagen.flow_from_directory(
     class_mode='sparse',
     subset='validation',
     seed=123,
-    color_mode='rgb',  # Explicitly specify RGB
+    color_mode='rgb',
     interpolation='bilinear'
 )
 
@@ -57,10 +55,8 @@ print(f"Found {val_generator.samples} validation images")
 print(f"Number of classes: {train_generator.num_classes}")
 print(f"Class indices: {train_generator.class_indices}")
 
-# Step 2: Create Model with explicit input shape
 print("Creating model...")
 
-# Create base model with explicit input shape
 base_model = EfficientNetB0(
     include_top=False, 
     weights='imagenet', 
@@ -68,7 +64,6 @@ base_model = EfficientNetB0(
 )
 base_model.trainable = False
 
-# Create the full model
 model = models.Sequential([
     base_model,
     layers.GlobalAveragePooling2D(),
@@ -76,7 +71,6 @@ model = models.Sequential([
     layers.Dense(train_generator.num_classes, activation='softmax')
 ])
 
-# Compile model
 model.compile(
     optimizer='adam',
     loss='sparse_categorical_crossentropy',
@@ -95,7 +89,6 @@ dummy_input = tf.random.normal((1, 224, 224, 3))
 dummy_output = model(dummy_input)
 print(f"Dummy test successful! Output shape: {dummy_output.shape}")
 
-# Step 3: Training with callbacks
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 
 callbacks = [
@@ -132,7 +125,7 @@ print("\nStarting training...")
 history = model.fit(
     train_generator,
     validation_data=val_generator,
-    epochs=15,  # Increased epochs
+    epochs=15,  
     steps_per_epoch=steps_per_epoch,
     validation_steps=validation_steps,
     callbacks=callbacks,
