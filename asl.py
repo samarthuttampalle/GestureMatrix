@@ -8,15 +8,15 @@ import time
 import os
 import json
 
-# --- Page Configuration ---
+
 st.set_page_config(page_title="ASL Real-time Detection", layout="wide")
 
-# --- ASL Labels ---
+
 ASL_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
               'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
               'del', 'nothing', 'space']
 
-# --- Core Application Class ---
+
 class ASLDetector:
     def __init__(self, model_path):
         """Initialize the ASL detector with trained model"""
@@ -29,14 +29,11 @@ class ASLDetector:
         
         self.load_model()
         
-        # Initialize text-to-speech engine
         self.tts_engine = pyttsx3.init()
         self.tts_engine.setProperty('rate', 150)
         self.tts_engine.setProperty('volume', 0.9)
 
     def load_model(self):
-        # This function remains unchanged from the version that successfully loaded your model.
-        # It's included here for completeness.
         try:
             tf.keras.backend.clear_session()
             self.model = tf.keras.models.load_model(self.model_path, compile=False)
@@ -49,7 +46,7 @@ class ASLDetector:
                     raise RuntimeError("Failed to recreate model architecture.")
                 self.model.load_weights(self.model_path)
             else:
-                raise e # Re-raise other errors
+                raise e 
         
         if self.model:
             self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
@@ -60,7 +57,6 @@ class ASLDetector:
             self.expected_channels = 3
 
     def preprocess_image(self, image, debug=False):
-        # This function is unchanged.
         try:
             if image is None or image.size == 0: raise ValueError("Empty image")
             img_size = (self.input_width, self.input_height)
@@ -78,7 +74,6 @@ class ASLDetector:
             return np.zeros((1, self.input_height, self.input_width, 3), dtype=np.float32)
 
     def predict_sign(self, image, debug=False):
-        # This function is unchanged.
         if self.model is None: return "Model not loaded", 0.0
         try:
             processed_image = self.preprocess_image(image, debug=debug)
@@ -91,7 +86,6 @@ class ASLDetector:
             return f"Prediction error: {e}", 0.0
 
     def recreate_model_architecture(self, num_classes: int = 29):
-        # This function is unchanged.
         try:
             tf.keras.backend.clear_session()
             base_model = tf.keras.applications.EfficientNetB0(include_top=False, weights=None, input_shape=(224, 224, 3))
@@ -101,12 +95,10 @@ class ASLDetector:
         except: return False
 
     def load_labels(self, labels_path: str | None = None):
-        # This function is unchanged.
         if labels_path and os.path.exists(labels_path):
             with open(labels_path, 'r') as f: self.index_to_label = {int(k): v for k, v in json.load(f).items()}
 
     def speak_text(self, text):
-        # This function is unchanged.
         try:
             def speak():
                 self.tts_engine.say(text)
@@ -117,9 +109,7 @@ class ASLDetector:
         except Exception as e:
             st.error(f"TTS Error: {e}")
 
-# --- Helper Function for Hand Detection ---
 def extract_hand_roi(frame, use_center_crop=False):
-    # This function is unchanged.
     if use_center_crop:
         h, w = frame.shape[:2]
         size = min(h, w) * 2 // 3
@@ -147,27 +137,23 @@ def extract_hand_roi(frame, use_center_crop=False):
             return frame[y:y+h, x:x+w], frame
     return None, frame
 
-# --- Main Streamlit Application ---
 def main():
-    st.title("🤟 ASL Real-time Detection System")
+    st.title("ASL Real-time Detection System")
     st.markdown("Real-time American Sign Language detection with speech output.")
 
-    # --- Session State Initialization ---
     if "run_camera" not in st.session_state: st.session_state.run_camera = False
     if "detected_text" not in st.session_state: st.session_state.detected_text = ""
     if "last_added_sign" not in st.session_state: st.session_state.last_added_sign = ""
     if "detector" not in st.session_state: st.session_state.detector = None
 
-    # --- Sidebar Configuration ---
     with st.sidebar:
         st.header("⚙️ Configuration")
         model_path = st.text_input("Model Path", value="sign_language_model_fixed.keras")
         labels_path = st.text_input("Labels JSON Path (optional)", value="class_labels.json")
         confidence_threshold = st.slider("Confidence Threshold", 0.0, 1.0, 0.8, 0.05)
         detection_mode = st.selectbox("Detection Mode", ["Auto (Skin Detection)", "Center Crop", "Full Frame"])
-        
-        # --- Robust Detector Initialization ---
-        if st.button("🔄 Load / Reload Model"):
+
+        if st.button(" Load / Reload Model"):
             try:
                 with st.spinner("Loading model and TTS engine..."):
                     st.session_state.detector = ASLDetector(model_path)
@@ -176,9 +162,9 @@ def main():
                 st.session_state.detector = None
         
         if st.session_state.detector and st.session_state.detector.model:
-            st.success("✅ Model and TTS Engine are ready!")
+            st.success("Model and TTS Engine are ready!")
         else:
-            st.warning("⚠️ Please load the model to begin.")
+            st.warning("Please load the model to begin.")
 
     # --- Main UI (Conditional on successful initialization) ---
     if not st.session_state.detector:
@@ -200,7 +186,6 @@ def main():
             if st.button("🔊 Speak Full Text", type="primary"): st.session_state.detector.speak_text(st.session_state.detected_text)
             if st.button("🗑️ Clear Text"): st.session_state.detected_text = ""; st.rerun()
 
-        # --- Camera Processing Loop ---
         if st.session_state.run_camera:
             cap = cv2.VideoCapture(0)
             if not cap.isOpened():
