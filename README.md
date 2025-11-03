@@ -1,15 +1,15 @@
-# 🤟 ASL Sign Language Recognition
+# GestureMatrix
 
 This project recognizes American Sign Language (ASL) alphabets (A–Z) using deep learning with **EfficientNetB0**, and deploys a **real-time detection app** using **Streamlit + OpenCV** with speech output.
 
-## 🚀 Features
+##  eatures
 - Train ASL alphabet recognition model with EfficientNetB0 (`model_train.py`)
 - Real-time hand gesture recognition (`asl.py`)
 - Text-to-Speech support
 - Saved trained models (`.keras`)
 - Class label mappings (`class_labels.json`)
 
-## 📂 Project Structure
+## Project Structure
 ```
 .
 ├── asl.py                     # Streamlit real-time detection app
@@ -22,14 +22,14 @@ This project recognizes American Sign Language (ASL) alphabets (A–Z) using dee
 └── README.md
 ```
 
-## 🛠 Installation
+## Installation
 ```bash
 git clone https://github.com/samarthuttampalle/asl-sign-language.git
 cd asl-sign-language
 pip install -r requirements.txt
 ```
 
-## 🎮 Usage
+## Usage
 ### Train Model
 ```bash
 python model_train.py
@@ -40,9 +40,9 @@ python model_train.py
 streamlit run asl.py
 ```
 
-## 📊 Results
+## Results
 - Accuracy and loss curves saved in `training_history.png`
 - Real-time predictions with confidence scores
 
 ---
-✨ Built with TensorFlow, Streamlit, and OpenCV
+Built with TensorFlow, Streamlit, and OpenCV
